@@ -24,9 +24,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ variant
   const food = Math.round(plate * 0.46);
   return new ImageResponse(
     (
-      <div style={{ width: s, height: s, display: "flex", alignItems: "center", justifyContent: "center", background: "#0d7a4e", borderRadius: Math.round(s * v.radius) }}>
-        <div style={{ width: plate, height: plate, borderRadius: plate, background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `inset 0 0 0 ${Math.round(plate * 0.08)}px #e0f2e8` }}>
-          <div style={{ width: food, height: food, borderRadius: food, background: "#ffb41f" }} />
+      <div style={{ width: s, height: s, display: "flex", alignItems: "center", justifyContent: "center", background: "#3d2f94", borderRadius: Math.round(s * v.radius) }}>
+        <div style={{ width: plate, height: plate, borderRadius: plate, background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `inset 0 0 0 ${Math.round(plate * 0.08)}px #fde6ee` }}>
+          <div style={{ width: food, height: food, borderRadius: food, background: "#ffb347" }} />
         </div>
       </div>
     ),

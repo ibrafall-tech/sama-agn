@@ -166,7 +166,7 @@ export function SheetScreen() {
                   </div>
                 ))}
               </div>
-              <p className="muted small">Cochez au fur et à mesure que vous distribuez · {handed.count}/{people.length} servis</p>
+              <p className="muted small">Cochez au fur et à mesure que vous distribuez · {people.filter((p) => handed.has(p.id)).length}/{people.length} servis</p>
             </section>
           )}
 

@@ -83,7 +83,7 @@ export function OrderScreen() {
         <>
           <div className="hello">
             <p className="eyebrow">{longDate(data.date)}</p>
-            <h1 className="h1">Salut {data.me.name}, on mange quoi&nbsp;?</h1>
+            <h1 className="h1">Salut <em>{data.me.name}</em>, on mange quoi&nbsp;?</h1>
           </div>
           {!online && <div className="banner" style={{ marginBottom: 12 }}>Hors connexion : reconnectez-vous pour envoyer ou voir les commandes à jour.</div>}
 

@@ -23,8 +23,8 @@ chacun choisit sur son téléphone, et la personne qui va au restaurant récupè
 | Connexion | Commande envoyée | À commander au restaurant |
 | :---: | :---: | :---: |
 | <img src="docs/screenshots/01-connexion.jpg" width="220" alt="Écran de connexion : prénom et code du bureau"> | <img src="docs/screenshots/03-commande-envoyee.jpg" width="220" alt="Confirmation : commande envoyée avec le montant"> | <img src="docs/screenshots/05-a-commander.jpg" width="220" alt="Liste regroupée par plat avec quantités et montants"> |
-| **Par personne (distribution)** | **Menu reconnu automatiquement** | **Mode sombre** |
-| <img src="docs/screenshots/06-par-personne.jpg" width="220" alt="Liste par personne avec cases à cocher pour la distribution"> | <img src="docs/screenshots/08-menu-reconnu.jpg" width="220" alt="Plats et prix reconnus depuis le message collé, suggestions de plats déjà servis"> | <img src="docs/screenshots/09-mode-sombre.jpg" width="220" alt="Écran Commander en mode sombre"> |
+| **Par personne (distribution)** | **Menu reconnu automatiquement** | **Pour un collègue** |
+| <img src="docs/screenshots/06-par-personne.jpg" width="220" alt="Liste par personne avec cases à cocher pour la distribution"> | <img src="docs/screenshots/08-menu-reconnu.jpg" width="220" alt="Plats et prix reconnus depuis le message collé, suggestions de plats déjà servis"> | <img src="docs/screenshots/09-pour-un-collegue.jpg" width="220" alt="Fenêtre pour saisir la commande d'un collègue qui a commandé à l'oral"> |
 
 </details>
 
@@ -37,6 +37,10 @@ chacun choisit sur son téléphone, et la personne qui va au restaurant récupè
 | Le gestionnaire | **Menu** | Collez le menu reçu par WhatsApp : les plats et les prix sont reconnus automatiquement. Ajout en un geste des plats déjà servis, reprise du dernier menu, préparation du menu du lendemain. |
 
 Les écrans se mettent à jour tout seuls (toutes les 5 secondes quand l'app est ouverte).
+
+**Identité visuelle « Bazin & Bissap »** : un seul thème clair. Indigo du bazin teint pour les actions,
+rose hibiscus pour les quantités et le total, mangue pour « J'y vais », fond blanc à peine lilas.
+La carte du jour (restaurant, heure limite, qui y va) est un ticket indigo reconnaissable au premier coup d'œil.
 
 ## Stack
 
