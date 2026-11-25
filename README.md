@@ -93,7 +93,8 @@ Les tables sont créées au premier appel. `npm run db:migrate` les crée à la 
 ## Déployer sur Vercel
 
 1. Poussez le dépôt sur GitHub, puis **Add New → Project** sur Vercel et importez-le.
-2. Dans le projet : **Storage → Create Database → Neon (Postgres)**, et connectez-la au projet.
+2. Dans le projet : **Storage → Create Database → Neon (Postgres)**, région **Europe (Frankfurt)**
+   pour être proche des serveurs de l'app (`vercel.json` les place à Francfort, au plus près de Dakar), et connectez-la au projet.
    La variable `DATABASE_URL` est ajoutée automatiquement.
 3. **Settings → Environment Variables**, ajoutez :
    - `OFFICE_CODE` : le code que vous donnerez aux collègues
