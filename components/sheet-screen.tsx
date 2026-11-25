@@ -6,8 +6,8 @@ import { longDate } from "@/lib/time";
 import type { DayPayload, Order } from "@/lib/types";
 import { api, useDay, vibrate } from "./api";
 import { cartTotal, DishPicker, LoadingList, StatusCard, type Cart } from "./day-parts";
-import { IconCheck, IconCopy, IconLock, IconPlus, IconPrint, IconShare } from "./icons";
-import { BottomNav, TopBar } from "./shell";
+import { IconCheck, IconCopy, IconLock, IconPlus, IconPrint, IconShare, IconX } from "./icons";
+import { BottomNav, closeOnBackdrop, TopBar } from "./shell";
 import { toast } from "./toast";
 
 /** Ticks for "handed out", kept on the runner's phone only. */
@@ -39,7 +39,7 @@ export function SheetScreen() {
 
   if (!data) {
     return (
-      <main className="page">
+      <main className="page no-dock">
         <TopBar me={null} />
         <div className="hello"><h1 className="h1">La feuille</h1></div>
         {error ? <div className="banner">{error}</div> : <LoadingList />}
@@ -84,7 +84,7 @@ export function SheetScreen() {
   }
 
   return (
-    <main className="page">
+    <main className="page no-dock">
       <TopBar me={data.me} />
       <div className="hello">
         <p className="eyebrow">{longDate(data.date)}</p>
@@ -110,11 +110,11 @@ export function SheetScreen() {
 
           <div className="stack no-print" style={{ gap: 8 }}>
             <button className="btn btn-primary btn-lg btn-block" type="button" onClick={share}><IconShare /> Envoyer la feuille</button>
-            <div className="actions-grid" style={{ gridTemplateColumns: `repeat(${canManage && day ? 3 : 2}, 1fr)` }}>
-              <button className="btn btn-sm" type="button" onClick={copy}><IconCopy /> Copier</button>
-              <button className="btn btn-sm" type="button" onClick={() => window.print()}><IconPrint /> Imprimer</button>
+            <div className="actions-grid">
+              <button className="btn btn-tool" type="button" onClick={copy}><IconCopy /> Copier</button>
+              <button className="btn btn-tool" type="button" onClick={() => window.print()}><IconPrint /> Imprimer</button>
               {canManage && day && (
-                <button className="btn btn-sm" type="button" onClick={toggleClosed}><IconLock /> {day.closed ? "Rouvrir" : "Clôturer"}</button>
+                <button className="btn btn-tool" type="button" onClick={toggleClosed}><IconLock /> {day.closed ? "Rouvrir" : "Clôturer"}</button>
               )}
             </div>
           </div>
@@ -145,17 +145,20 @@ export function SheetScreen() {
                 {people.map((o) => (
                   <div className={"li" + (handed.has(o.id) ? " handed" : "")} key={o.id}>
                     <button className="check" type="button" role="checkbox" aria-checked={handed.has(o.id)} aria-label={`${o.name} servi`} onClick={() => handed.toggle(o.id)}>
-                      {handed.has(o.id) && <IconCheck size={16} />}
+                      <i>{handed.has(o.id) && <IconCheck size={16} />}</i>
                     </button>
                     <div className="li-main">
                       <b>{o.name}</b>
                       <small>{linesLabel(o)}</small>
-                      {o.note && <small style={{ color: "var(--ink)" }}>« {o.note} »</small>}
+                      {o.note && <small className="note">« {o.note} »</small>}
                       {canManage && (
-                        <span className="row" style={{ gap: 12, marginTop: 4 }}>
-                          <button className="link-btn small" type="button" onClick={() => setEditing(o)}>Modifier</button>
+                        <span className="li-actions">
+                          <button className="link-btn small" type="button" onClick={() => { setConfirmDel(null); setEditing(o); }}>Modifier</button>
                           {confirmDel === o.id ? (
-                            <button className="link-btn small" style={{ color: "var(--danger)" }} type="button" onClick={() => remove(o)}>Confirmer la suppression</button>
+                            <>
+                              <button className="link-btn small" style={{ color: "var(--danger)" }} type="button" onClick={() => remove(o)}>Oui, supprimer</button>
+                              <button className="link-btn small" style={{ color: "var(--muted)" }} type="button" onClick={() => setConfirmDel(null)}>Non</button>
+                            </>
                           ) : (
                             <button className="link-btn small" style={{ color: "var(--muted)" }} type="button" onClick={() => setConfirmDel(o.id)}>Supprimer</button>
                           )}
@@ -205,6 +208,7 @@ function PrintSheet({ data }: { data: DayPayload }) {
 
 function ColleagueDialog({ data, order, onClose, onSaved }: { data: DayPayload; order: Order | null; onClose: () => void; onSaved: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(order?.name ?? "");
   const [note, setNote] = useState(order?.note ?? "");
   const [cart, setCart] = useState<Cart>(() => Object.fromEntries((order?.lines ?? []).map((l) => [l.dishId, l.qty])));
@@ -217,7 +221,11 @@ function ColleagueDialog({ data, order, onClose, onSaved }: { data: DayPayload; 
   }, []);
 
   async function save() {
-    if (!name.trim()) return toast("Indiquez le prénom du collègue");
+    if (!name.trim()) {
+      toast("Indiquez d'abord le prénom du collègue");
+      nameRef.current?.focus();
+      return;
+    }
     setSaving(true);
     try {
       const forId = isMine ? undefined : order?.personId ?? `guest-${crypto.randomUUID()}`;
@@ -236,23 +244,27 @@ function ColleagueDialog({ data, order, onClose, onSaved }: { data: DayPayload; 
   }
 
   return (
-    <dialog ref={ref} className="sheet" onClose={onClose} onClick={(e) => e.target === ref.current && ref.current?.close()}>
+    <dialog ref={ref} className="sheet" aria-labelledby="collegue-titre" onClose={onClose} onClick={closeOnBackdrop}>
       <div className="sheet-body">
         <div className="sheet-grip" />
-        <h2 className="h2">{order ? `Commande de ${order.name}` : "Pour un collègue"}</h2>
+        <div className="sheet-head">
+          <h2 className="h2" id="collegue-titre">{order ? `Commande de ${order.name}` : "Pour un collègue"}</h2>
+          <button className="icon-close" type="button" aria-label="Fermer" autoFocus onClick={() => ref.current?.close()}><IconX size={18} /></button>
+        </div>
         <label className="field">
           Prénom
-          <input className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={40} placeholder="Ex. Moussa" disabled={isMine} />
+          <input ref={nameRef} className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={40} placeholder="Ex. Moussa" autoCapitalize="words" enterKeyHint="next" disabled={isMine} />
         </label>
         <DishPicker dishes={data.dishes} cart={cart} onChange={setCart} />
         <label className="field">
           Précision
-          <input className="input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} placeholder="Facultatif" />
+          <input className="input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} placeholder="Facultatif" enterKeyHint="done" />
         </label>
-        <button className="btn btn-primary btn-lg btn-block" type="button" disabled={saving || (!items && !order)} onClick={save}>
-          {items ? <>Enregistrer · <span className="num">{formatPrice(total)}</span></> : "Retirer la commande"}
-        </button>
-        <button className="btn btn-ghost btn-block" type="button" onClick={() => ref.current?.close()}>Annuler</button>
+        <div className="sheet-foot">
+          <button className="btn btn-primary btn-lg btn-block" type="button" disabled={saving || (!items && !order)} onClick={save}>
+            {saving ? "Enregistrement…" : items ? <><span>Enregistrer <span className="num">({items})</span></span><span className="btn-pill num">{formatPrice(total)}</span></> : "Retirer la commande"}
+          </button>
+        </div>
       </div>
     </dialog>
   );

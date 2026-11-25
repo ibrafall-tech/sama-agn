@@ -4,13 +4,17 @@ import { CATEGORIES } from "./types";
 const name = z.string().trim().min(1, "Le prénom est obligatoire").max(40, "Prénom trop long");
 
 export const loginSchema = z.object({
-  code: z.string().trim().min(1, "Entrez le code du bureau").max(64),
+  code: z.string().trim().min(1, "Entrez le code").max(64),
   name,
+  /** "admin" when the person chose « Je gère le menu » on the login screen. */
+  role: z.enum(["member", "admin"]).default("member"),
 });
 
 export const profileSchema = z.object({
   name: name.optional(),
   adminCode: z.string().trim().min(1).max(64).optional(),
+  /** Leave manager mode on this phone (e.g. before lending it). */
+  dropAdmin: z.literal(true).optional(),
 });
 
 export const time = z.union([z.literal(""), z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Heure invalide")]);

@@ -18,6 +18,8 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   themeColor: "#f1f8f8",
   colorScheme: "light",
+  // Android: the page shrinks above the keyboard instead of being covered by it.
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

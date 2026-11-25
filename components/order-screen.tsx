@@ -7,7 +7,7 @@ import type { Order } from "@/lib/types";
 import { api, useDay, vibrate } from "./api";
 import { cartTotal, DishPicker, LoadingList, sameCart, StatusCard, type Cart } from "./day-parts";
 import { IconCheck } from "./icons";
-import { BottomNav, TopBar } from "./shell";
+import { BottomNav, InstallBanner, TopBar } from "./shell";
 import { toast } from "./toast";
 
 const cartOf = (o: Order | null | undefined): Cart => Object.fromEntries((o?.lines ?? []).map((l) => [l.dishId, l.qty]));
@@ -61,7 +61,7 @@ export function OrderScreen() {
         json: { date: data.date, note: note.trim(), items: Object.entries(cart).filter(([, q]) => q > 0).map(([dishId, qty]) => ({ dishId, qty })) },
       });
       vibrate(30);
-      toast(items ? "C'est noté ! Ta commande est envoyée" : "Commande retirée");
+      if (!items) toast("Commande retirée");
       setTouched(false);
       await reload();
     } catch (e) {
@@ -86,15 +86,24 @@ export function OrderScreen() {
             <h1 className="h1">Salut <em>{data.me.name}</em>, on mange quoi&nbsp;?</h1>
           </div>
           {!online && <div className="banner" style={{ marginBottom: 12 }}>Hors connexion : reconnectez-vous pour envoyer ou voir les commandes à jour.</div>}
+          <InstallBanner />
 
           {!data.day || !dishes.length ? (
             <div className="card empty">
               <div className="empty-art" aria-hidden><i /></div>
               <h2 className="h2">Le menu n&apos;est pas encore là</h2>
               <p className="muted">
-                {data.me.admin ? "Vous êtes gestionnaire : ajoutez le menu du restaurant, ça prend une minute." : "Dès que le menu du jour est ajouté, il apparaît ici tout seul. Pas besoin de recharger."}
+                {data.me.admin ? "Vous êtes gestionnaire : ajoutez le menu du restaurant, ça prend une minute." : "Dès qu'il est ajouté, il apparaît ici tout seul. Pas besoin de recharger."}
               </p>
-              {data.me.admin && <Link className="btn btn-primary btn-lg" href="/gestion">Ajouter le menu du jour</Link>}
+              {data.me.admin ? (
+                <Link className="btn btn-primary btn-lg" href="/gestion">Ajouter le menu du jour</Link>
+              ) : (
+                <ol className="steps" aria-label="Comment ça marche">
+                  <li><b>1</b>Le gestionnaire publie le menu du restaurant.</li>
+                  <li><b>2</b>Vous touchez votre plat, puis « Valider ».</li>
+                  <li><b>3</b>La personne qui y va récupère la feuille de tout le monde.</li>
+                </ol>
+              )}
             </div>
           ) : (
             <>
@@ -133,10 +142,11 @@ export function OrderScreen() {
                 </div>
               )}
 
+              {(closed || mine || items > 0) && (
               <div className="dock">
                 <div className="dock-inner">
                   {closed && !mine ? (
-                    <div className="done" style={{ borderColor: "var(--line)" }}>
+                    <div className="done neutral">
                       <div className="done-text"><b>Commandes clôturées</b><span className="muted small">Voyez directement avec {data.day.runnerName ?? "la personne qui y va"}.</span></div>
                     </div>
                   ) : mine && !dirty ? (
@@ -149,17 +159,19 @@ export function OrderScreen() {
                     </div>
                   ) : items > 0 ? (
                     <button className="btn btn-primary btn-lg btn-block" type="button" disabled={saving} onClick={submit}>
-                      {saving ? "Envoi…" : <>{mine ? "Mettre à jour" : "Valider"} · {items} article{items > 1 ? "s" : ""} · <span className="num">{formatPrice(total)}</span></>}
+                      {saving ? "Envoi…" : (
+                        <>
+                          <span>{mine ? "Mettre à jour" : "Valider"} <span className="num" aria-label={`${items} article${items > 1 ? "s" : ""}`}>({items})</span></span>
+                          <span className="btn-pill num">{formatPrice(total)}</span>
+                        </>
+                      )}
                     </button>
-                  ) : mine ? (
-                    <button className="btn btn-lg btn-block btn-danger" type="button" disabled={saving} onClick={submit}>Retirer ma commande</button>
                   ) : (
-                    <div className="done" style={{ borderColor: "var(--line)", boxShadow: "none" }}>
-                      <div className="done-text"><b>Touchez un plat pour le choisir</b><span className="muted small">Vous validerez ensuite en un geste.</span></div>
-                    </div>
+                    <button className="btn btn-lg btn-block btn-danger" type="button" disabled={saving} onClick={submit}>Retirer ma commande</button>
                   )}
                 </div>
               </div>
+              )}
             </>
           )}
         </>

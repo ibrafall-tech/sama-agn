@@ -57,9 +57,9 @@ export function StatusCard({ data, onChanged }: { data: DayPayload; onChanged: (
           <p className="resto">{day.restaurant || "Restaurant du jour"}</p>
         </div>
         {day.deadline && (
-          <div style={{ textAlign: "right", flex: "none" }}>
+          <div className="deadline">
             <div className="row muted small" style={{ gap: 4, justifyContent: "flex-end" }}><IconClock /> avant</div>
-            <b className="num" style={{ fontSize: 20 }}>{hhmm(day.deadline)}</b>
+            <b className="num">{hhmm(day.deadline)}</b>
             {left !== null && left > 0 && !day.closed && <div className="muted small num">{formatLeft(left)}</div>}
           </div>
         )}

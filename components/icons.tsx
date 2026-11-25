@@ -31,6 +31,10 @@ export const IconLock = ({ size = 20 }: P) => (
 export const IconPlus = ({ size = 20 }: P) => (
   <svg {...base(size)}><path d="M12 5v14M5 12h14" /></svg>
 );
-export const IconClock = ({ size = 16 }: P) => (
+/** iOS "Share" glyph, used in the iPhone install hint. */
+export const IconShareIos = ({ size = 18 }: P) => (
+  <svg {...base(size)}><path d="M12 3v12M8 7l4-4 4 4" /><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1" /></svg>
+);
+export const IconClock =({ size = 16 }: P) => (
   <svg {...base(size)}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
 );

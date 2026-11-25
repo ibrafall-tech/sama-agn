@@ -10,7 +10,11 @@ export async function POST(req: Request) {
   const role = checkCode(parsed.data.code);
   if (!role) {
     await pause(700);
-    return fail(401, "Ce code n'est pas le bon. Demandez-le à un collègue.");
+    return fail(401, parsed.data.role === "admin" ? "Ce n'est pas le code gestionnaire." : "Ce code n'est pas le bon. Demandez-le à un collègue.");
+  }
+  if (parsed.data.role === "admin" && role !== "admin") {
+    await pause(700);
+    return fail(401, "C'est le code du bureau. Pour gérer le menu, il faut le code gestionnaire.");
   }
   const previous = await getSession();
   const s = await writeSession({ pid: previous?.pid ?? crypto.randomUUID(), name: parsed.data.name, admin: role === "admin" || !!previous?.admin });
@@ -24,6 +28,7 @@ export async function PATCH(req: Request) {
   const parsed = profileSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return fail(400, firstError(parsed.error));
   let admin = current.admin;
+  if (parsed.data.dropAdmin) admin = false;
   if (parsed.data.adminCode !== undefined) {
     if (checkCode(parsed.data.adminCode) !== "admin") {
       await pause(700);

@@ -5,9 +5,11 @@ import { addDays, dateKey, longDate } from "@/lib/time";
 import { CATEGORIES, type Category, type HistoryPayload } from "@/lib/types";
 import { api, useDay } from "./api";
 import { LoadingList } from "./day-parts";
-import { IconPlus, IconX } from "./icons";
+import { IconCheck, IconPlus, IconX } from "./icons";
 import { BottomNav, TopBar } from "./shell";
 import { toast } from "./toast";
+
+const weekday = (key: string) => new Date(key + "T12:00:00Z").toLocaleDateString("fr-FR", { timeZone: "UTC", weekday: "long" });
 
 type Row = { key: string; id?: string; name: string; price: string; category: Category };
 const newKey = () => Math.random().toString(36).slice(2);
@@ -112,7 +114,7 @@ export function ManageScreen() {
 
   if (!data) {
     return (
-      <main className="page">
+      <main className="page no-dock">
         <TopBar me={null} />
         {header}
         {error ? <div className="banner">{error}</div> : <LoadingList />}
@@ -123,7 +125,7 @@ export function ManageScreen() {
 
   if (!data.me.admin) {
     return (
-      <main className="page">
+      <main className="page no-dock">
         <TopBar me={data.me} />
         {header}
         <form className="card stack" onSubmit={(e) => { e.preventDefault(); unlock(); }}>
@@ -153,7 +155,7 @@ export function ManageScreen() {
         <button type="button" aria-pressed={date === today} onClick={() => setDate(today)}>Aujourd&apos;hui</button>
         <button type="button" aria-pressed={date !== today} onClick={() => setDate(addDays(today, 1))}>Demain</button>
       </div>
-      <p className="muted small cap">{longDate(date)}{data.orders.length ? ` · ${data.orders.length} commande(s) déjà passée(s)` : ""}</p>
+      <p className="muted small cap">{longDate(date)}{data.orders.length ? ` · ${data.orders.length} commande${data.orders.length > 1 ? "s" : ""} déjà passée${data.orders.length > 1 ? "s" : ""}` : ""}</p>
 
       {rows === null ? <LoadingList /> : (
         <div className="stack" style={{ gap: 20 }}>
@@ -188,7 +190,7 @@ export function ManageScreen() {
           {(history?.previous || suggestions.length > 0) && (
             <div className="stack">
               {history?.previous && !list.length && (
-                <button className="btn btn-sun btn-block" type="button" onClick={reusePrevious}>Reprendre le menu du {longDate(history.previous.date)}</button>
+                <button className="btn btn-sun btn-block" type="button" onClick={reusePrevious}>Reprendre le menu de {weekday(history.previous.date)}</button>
               )}
               {suggestions.length > 0 && (
                 <>
@@ -214,14 +216,20 @@ export function ManageScreen() {
               <div key={r.key} className="dish-edit">
                 <div className="editor-row">
                   <input className="input input-sm" aria-label="Nom du plat" value={r.name} maxLength={80} placeholder="Nom du plat"
+                    autoCapitalize="sentences" enterKeyHint="next"
                     onChange={(e) => edit(list.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
-                  <input className="input input-sm num" aria-label="Prix en francs CFA" inputMode="numeric" value={r.price} placeholder="Prix"
-                    onChange={(e) => edit(list.map((x, j) => (j === i ? { ...x, price: e.target.value.replace(/\D/g, "") } : x)))} />
                   <button className="icon-btn" type="button" aria-label={`Supprimer ${r.name || "ce plat"}`} onClick={() => edit(list.filter((_, j) => j !== i))}><IconX /></button>
-                  <select className="input input-sm" aria-label="Catégorie" value={r.category}
-                    onChange={(e) => edit(list.map((x, j) => (j === i ? { ...x, category: e.target.value as Category } : x)))}>
-                    {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <div className="editor-sub">
+                    <label className="price-field">
+                      <input className="input input-sm num" aria-label="Prix en francs CFA" inputMode="numeric" pattern="[0-9]*" enterKeyHint="done" value={r.price} placeholder="Prix"
+                        onChange={(e) => edit(list.map((x, j) => (j === i ? { ...x, price: e.target.value.replace(/\D/g, "").slice(0, 7) } : x)))} />
+                      <span aria-hidden>F</span>
+                    </label>
+                    <select className="input input-sm" aria-label="Catégorie" value={r.category}
+                      onChange={(e) => edit(list.map((x, j) => (j === i ? { ...x, category: e.target.value as Category } : x)))}>
+                      {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
                 </div>
               </div>
             ))}
@@ -230,13 +238,25 @@ export function ManageScreen() {
         </div>
       )}
 
-      <div className="dock">
-        <div className="dock-inner">
-          <button className="btn btn-primary btn-lg btn-block" type="button" disabled={saving || !valid || (!dirty && !!data.day)} onClick={publish}>
-            {saving ? "Publication…" : !dirty && data.day ? "Menu publié ✓" : `Publier le menu · ${valid} plat${valid > 1 ? "s" : ""}`}
-          </button>
+      {rows !== null && (dirty || !data.day || valid > 0) && (
+        <div className="dock">
+          <div className="dock-inner">
+            {!dirty && data.day ? (
+              <div className="done">
+                <span className="done-icon"><IconCheck /></span>
+                <div className="done-text">
+                  <b>Menu publié · {data.dishes.length} plat{data.dishes.length > 1 ? "s" : ""}</b>
+                  <span className="muted small">Modifiez-le ici, puis republiez.</span>
+                </div>
+              </div>
+            ) : (
+              <button className="btn btn-primary btn-lg btn-block" type="button" disabled={saving || !valid} onClick={publish}>
+                {saving ? "Publication…" : !valid ? "Ajoutez au moins un plat" : <><span>{data.day ? "Republier le menu" : "Publier le menu"}</span><span className="btn-pill num">{valid} plat{valid > 1 ? "s" : ""}</span></>}
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
       <BottomNav count={data.orders.length} />
     </main>
   );

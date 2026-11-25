@@ -20,11 +20,13 @@ chacun choisit sur son téléphone, et la personne qui va au restaurant récupè
 <summary><b>Toutes les captures</b></summary>
 <br>
 
-| Connexion | Commande envoyée | À commander au restaurant |
+| Connexion collègue | Connexion gestionnaire | Commande envoyée |
 | :---: | :---: | :---: |
-| <img src="docs/screenshots/01-connexion.jpg" width="220" alt="Écran de connexion : prénom et code du bureau"> | <img src="docs/screenshots/03-commande-envoyee.jpg" width="220" alt="Confirmation : commande envoyée avec le montant"> | <img src="docs/screenshots/05-a-commander.jpg" width="220" alt="Liste regroupée par plat avec quantités et montants"> |
-| **Par personne (distribution)** | **Menu reconnu automatiquement** | **Pour un collègue** |
-| <img src="docs/screenshots/06-par-personne.jpg" width="220" alt="Liste par personne avec cases à cocher pour la distribution"> | <img src="docs/screenshots/08-menu-reconnu.jpg" width="220" alt="Plats et prix reconnus depuis le message collé, suggestions de plats déjà servis"> | <img src="docs/screenshots/09-pour-un-collegue.jpg" width="220" alt="Fenêtre pour saisir la commande d'un collègue qui a commandé à l'oral"> |
+| <img src="docs/screenshots/01-connexion.jpg" width="220" alt="Écran de connexion : choix Je commande, prénom et code du bureau"> | <img src="docs/screenshots/10-connexion-gestionnaire.jpg" width="220" alt="Écran de connexion en mode Je gère le menu, avec le code gestionnaire"> | <img src="docs/screenshots/03-commande-envoyee.jpg" width="220" alt="Confirmation : commande envoyée avec le montant"> |
+| **À commander au restaurant** | **Par personne (distribution)** | **Pour un collègue** |
+| <img src="docs/screenshots/05-a-commander.jpg" width="220" alt="Liste regroupée par plat avec quantités et montants"> | <img src="docs/screenshots/06-par-personne.jpg" width="220" alt="Liste par personne avec cases à cocher pour la distribution"> | <img src="docs/screenshots/09-pour-un-collegue.jpg" width="220" alt="Fenêtre pour saisir la commande d'un collègue qui a commandé à l'oral"> |
+| **Menu reconnu automatiquement** | | |
+| <img src="docs/screenshots/08-menu-reconnu.jpg" width="220" alt="Plats et prix reconnus depuis le message collé, suggestions de plats déjà servis"> | | |
 
 </details>
 
@@ -37,6 +39,21 @@ chacun choisit sur son téléphone, et la personne qui va au restaurant récupè
 | Le gestionnaire | **Menu** | Collez le menu reçu par WhatsApp : les plats et les prix sont reconnus automatiquement. Ajout en un geste des plats déjà servis, reprise du dernier menu, préparation du menu du lendemain. |
 
 Les écrans se mettent à jour tout seuls (toutes les 5 secondes quand l'app est ouverte).
+
+### Qui se connecte comment
+
+- **Collègue** : « Je commande », son prénom et le code du bureau. Une seule fois, le téléphone s'en souvient.
+- **Gestionnaire** : « Je gère le menu » et le code gestionnaire ; il arrive directement sur le menu du jour.
+  Il commande aussi comme tout le monde, et peut quitter ce mode depuis son profil (pratique avant de prêter son téléphone).
+- **La personne qui va au restaurant** : pas de compte à part, car ce n'est pas toujours la même. Elle touche « J'y vais »
+  sur la carte du jour ; elle seule (avec le gestionnaire) peut alors clôturer, ajouter ou retirer une commande.
+
+### Pensé pour le téléphone (iOS et Android)
+
+- Installable : bouton « Installer » sur Android, guide « Partager → Sur l'écran d'accueil » sur iPhone.
+- Grandes zones tactiles (44 px minimum), pas de zoom involontaire au double tap ni à la saisie.
+- Clavier ouvert : la barre du bas s'efface pour laisser la place au champ.
+- Testé de 320 px (iPhone SE) aux grands écrans, encoches et barre d'accueil prises en compte.
 
 **Identité visuelle « Lagon »** : un seul thème clair. Bleu lagon (turquoise ciel) pour les actions,
 corail pour les quantités et le total, mangue pour « J'y vais », fond blanc d'eau et textes ardoise doux
