@@ -93,7 +93,7 @@ export function linesLabel(o: Pick<Order, "lines">): string {
 /** Plain-text sheet for WhatsApp or the clipboard. */
 export function sheetText(dateLabel: string, day: Day | null, orders: Order[]): string {
   const { dishes, people, total, items } = summarize(orders);
-  const out: string[] = [`*Commande du midi* · ${dateLabel}`];
+  const out: string[] = [`*Sama Agn* · ${dateLabel}`];
   if (day?.restaurant) out.push(`Restaurant : ${day.restaurant}`);
   if (day?.runnerName) out.push(`Récupérée par : ${day.runnerName}`);
   out.push("", `*À commander (${items})*`);

@@ -4,10 +4,10 @@ import { Toaster } from "@/components/toast";
 import { SwRegister } from "@/components/sw-register";
 
 export const metadata: Metadata = {
-  title: "Commande du midi",
+  title: "Sama Agn",
   description: "Chacun choisit son repas dans le menu du jour, la personne qui va au restaurant récupère la feuille.",
-  applicationName: "Commande du midi",
-  appleWebApp: { capable: true, title: "Midi", statusBarStyle: "default" },
+  applicationName: "Sama Agn",
+  appleWebApp: { capable: true, title: "Sama Agn", statusBarStyle: "default" },
   formatDetection: { telephone: false },
   icons: { icon: "/icons/192", apple: "/icons/apple" },
 };

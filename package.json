@@ -1,5 +1,5 @@
 {
-  "name": "commande-midi",
+  "name": "sama-agn",
   "version": "1.0.0",
   "private": true,
   "description": "PWA de commande des repas du midi pour le bureau : chacun choisit dans le menu du jour, la personne qui va au restaurant récupère la feuille.",

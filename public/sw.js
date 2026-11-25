@@ -1,5 +1,5 @@
 /* Service worker: app shell available offline, API always live. */
-const VERSION = "midi-v1";
+const VERSION = "sama-agn-v1";
 const OFFLINE_URL = "/offline";
 const PRECACHE = [OFFLINE_URL, "/icons/192", "/icons/512"];
 

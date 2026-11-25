@@ -63,7 +63,7 @@ export function SheetScreen() {
   }
   async function share() {
     if (navigator.share) {
-      try { await navigator.share({ title: "Commande du midi", text }); return; } catch (e) { if ((e as Error).name === "AbortError") return; }
+      try { await navigator.share({ title: "Sama Agn", text }); return; } catch (e) { if ((e as Error).name === "AbortError") return; }
     }
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener");
   }
@@ -188,7 +188,7 @@ function PrintSheet({ data }: { data: DayPayload }) {
   const { dishes, people, total } = summarize(data.orders);
   return (
     <div className="print-only">
-      <h2>Commande du midi · {longDate(data.date)}</h2>
+      <h2>Sama Agn · {longDate(data.date)}</h2>
       <p>{data.day?.restaurant}{data.day?.runnerName ? ` · récupérée par ${data.day.runnerName}` : ""}</p>
       <h3>À commander</h3>
       <table style={{ width: "100%", borderCollapse: "collapse" }}><tbody>

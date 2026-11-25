@@ -26,7 +26,7 @@ export default function Login() {
     <main className="login">
       <div className="login-hero">
         <div className="logo-mark" aria-hidden><i /></div>
-        <h1 className="h1">Commande du midi</h1>
+        <h1 className="h1">Sama Agn</h1>
         <p className="muted" style={{ fontSize: 17 }}>Choisissez votre plat en deux touches. La personne qui va au restaurant a tout sur sa feuille.</p>
       </div>
       <form className="stack" onSubmit={submit} style={{ gap: 16 }}>

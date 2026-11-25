@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Commande du midi",
-    short_name: "Midi",
+    name: "Sama Agn",
+    short_name: "Sama Agn",
     description: "Le menu du jour, la commande de chacun et la feuille pour le restaurant.",
     lang: "fr",
     start_url: "/",

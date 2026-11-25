@@ -1,4 +1,6 @@
-# Commande du midi
+# Sama Agn
+
+*« Mon déjeuner », en wolof.*
 
 Application web installable (PWA) pour commander les repas du midi au bureau.
 Fini le tour des bureaux pour noter les plats de chacun : le gestionnaire publie le menu du jour,

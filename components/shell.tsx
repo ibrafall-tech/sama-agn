@@ -58,9 +58,9 @@ export function TopBar({ me }: { me: Me | null }) {
 
   return (
     <header className="topbar">
-      <Link href="/" className="logo" aria-label="Commande du midi, accueil">
+      <Link href="/" className="logo" aria-label="Sama Agn, accueil">
         <span className="logo-mark" aria-hidden><i /></span>
-        Midi
+        Sama Agn
       </Link>
       <div className="row" style={{ gap: 8 }}>
         {!install.standalone && install.evt && (
