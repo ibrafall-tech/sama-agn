@@ -6,6 +6,28 @@ Application web installable (PWA) pour commander les repas du midi au bureau.
 Fini le tour des bureaux pour noter les plats de chacun : le gestionnaire publie le menu du jour,
 chacun choisit sur son téléphone, et la personne qui va au restaurant récupère la feuille récapitulative.
 
+## Aperçu
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/02-commander.jpg" width="240" alt="Écran Commander : menu du jour, un plat choisi, bouton Valider avec le total"><br><sub><b>Commander</b> : on touche un plat, on valide</sub></td>
+    <td align="center"><img src="docs/screenshots/04-feuille.jpg" width="240" alt="La feuille : total à payer, nombre de personnes et d'articles, bouton Envoyer la feuille"><br><sub><b>La feuille</b> : le total et l'envoi en un geste</sub></td>
+    <td align="center"><img src="docs/screenshots/07-coller-menu.jpg" width="240" alt="Gestion : menu reçu par WhatsApp collé dans la zone de texte"><br><sub><b>Menu</b> : on colle le message du restaurant</sub></td>
+  </tr>
+</table>
+
+<details>
+<summary><b>Toutes les captures</b></summary>
+<br>
+
+| Connexion | Commande envoyée | À commander au restaurant |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/01-connexion.jpg" width="220" alt="Écran de connexion : prénom et code du bureau"> | <img src="docs/screenshots/03-commande-envoyee.jpg" width="220" alt="Confirmation : commande envoyée avec le montant"> | <img src="docs/screenshots/05-a-commander.jpg" width="220" alt="Liste regroupée par plat avec quantités et montants"> |
+| **Par personne (distribution)** | **Menu reconnu automatiquement** | **Mode sombre** |
+| <img src="docs/screenshots/06-par-personne.jpg" width="220" alt="Liste par personne avec cases à cocher pour la distribution"> | <img src="docs/screenshots/08-menu-reconnu.jpg" width="220" alt="Plats et prix reconnus depuis le message collé, suggestions de plats déjà servis"> | <img src="docs/screenshots/09-mode-sombre.jpg" width="220" alt="Écran Commander en mode sombre"> |
+
+</details>
+
 ## Ce que fait l'app
 
 | Qui | Écran | En pratique |
