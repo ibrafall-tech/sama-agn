@@ -2,11 +2,10 @@
 
 *« Mon déjeuner », en wolof.*
 
-Application web installable (PWA) pour commander les repas du midi au bureau.
-Fini le tour des bureaux pour noter les plats de chacun : le gestionnaire publie le menu du jour,
-chacun choisit sur son téléphone, et la personne qui va au restaurant récupère la feuille récapitulative.
+Sama Agn est une application web installable sur téléphone (PWA) pour organiser les repas du midi au bureau.
 
-## Aperçu
+Plus besoin de passer de bureau en bureau pour noter les plats de chacun. Le gestionnaire publie le menu du jour,
+chacun choisit sur son téléphone, et la personne qui va au restaurant récupère une feuille récapitulative prête à montrer.
 
 <table>
   <tr>
@@ -16,8 +15,25 @@ chacun choisit sur son téléphone, et la personne qui va au restaurant récupè
   </tr>
 </table>
 
+## Une journée avec Sama Agn
+
+1. **Le matin**, le gestionnaire colle le menu reçu du restaurant (WhatsApp, SMS). Les plats et les prix sont reconnus tout seuls.
+2. **Avant l'heure limite**, chacun ouvre l'app, touche son plat et valide. Un compte à rebours rappelle le temps restant.
+3. **Un volontaire** touche « J'y vais ». Il voit la commande regroupée par plat pour le restaurant, et le détail par personne pour la distribution et l'argent.
+4. **Il envoie la feuille** sur WhatsApp ou l'imprime, clôture les commandes, puis coche chacun au moment de la distribution.
+
+Tous les écrans se mettent à jour automatiquement, toutes les 5 secondes quand l'app est ouverte.
+
+## Les trois rôles
+
+| Rôle | Connexion | Ce qu'il fait |
+| --- | --- | --- |
+| **Collègue** | « Je commande », son prénom et le code du bureau. Une seule fois : le téléphone s'en souvient. | Choisit ses plats, ajoute une précision (« sans piment »), modifie sa commande jusqu'à la clôture, et peut reprendre « comme la dernière fois ». |
+| **Gestionnaire** | « Je gère le menu » et le code gestionnaire. Il arrive directement sur le menu du jour. | Publie le menu d'aujourd'hui ou de demain : collage du message du restaurant, plats déjà servis ajoutés en un geste, reprise du dernier menu. Il commande aussi comme tout le monde, et peut quitter ce mode depuis son profil. |
+| **La personne qui y va** | Pas de compte à part, car ce n'est pas toujours la même personne. Elle touche « J'y vais » sur la carte du jour. | Avec le gestionnaire, elle est la seule à pouvoir clôturer les commandes, ajouter la commande d'un collègue qui a commandé à l'oral, ou en retirer une. |
+
 <details>
-<summary><b>Toutes les captures</b></summary>
+<summary><b>Toutes les captures d'écran</b></summary>
 <br>
 
 | Connexion collègue | Connexion gestionnaire | Commande envoyée |
@@ -30,92 +46,95 @@ chacun choisit sur son téléphone, et la personne qui va au restaurant récupè
 
 </details>
 
-## Ce que fait l'app
+## Pensé pour le téléphone
 
-| Qui | Écran | En pratique |
-| --- | --- | --- |
-| Tout le monde | **Commander** | Touchez un plat pour l'ajouter, puis « Valider ». Compte à rebours avant l'heure limite, bouton « J'y vais », raccourci « Comme la dernière fois ». |
-| La personne qui y va | **La feuille** | Vue « À commander » regroupée par plat (à montrer au restaurant), vue « Par personne » avec cases à cocher pour la distribution et le montant de chacun. Partage WhatsApp, copie, impression, clôture des commandes, ajout pour un collègue. |
-| Le gestionnaire | **Menu** | Collez le menu reçu par WhatsApp : les plats et les prix sont reconnus automatiquement. Ajout en un geste des plats déjà servis, reprise du dernier menu, préparation du menu du lendemain. |
+- **Installable** sur l'écran d'accueil : un bouton « Installer » sur Android ; sur iPhone, un guide « Partager → Sur l'écran d'accueil ».
+- **Grandes zones tactiles** (44 px minimum). Pas de zoom involontaire, ni au double tap ni pendant la saisie.
+- **Clavier ouvert** : la barre du bas s'efface pour laisser la place au champ.
+- **Testé de 320 px (iPhone SE) aux grands écrans**, avec les encoches et la barre d'accueil des iPhone prises en compte.
+- **Hors connexion** : l'app s'ouvre quand même et l'indique clairement. Les commandes, elles, partent toujours en direct.
 
-Les écrans se mettent à jour tout seuls (toutes les 5 secondes quand l'app est ouverte).
+**Identité visuelle « Lagon »**, un seul thème clair :
+- bleu lagon (turquoise ciel) pour les actions ;
+- corail pour les quantités et le total ;
+- mangue pour « J'y vais » ;
+- textes gris ardoise plutôt que noirs.
 
-### Qui se connecte comment
+La carte du jour (restaurant, heure limite, qui y va) est un ticket turquoise qu'on repère au premier coup d'œil.
 
-- **Collègue** : « Je commande », son prénom et le code du bureau. Une seule fois, le téléphone s'en souvient.
-- **Gestionnaire** : « Je gère le menu » et le code gestionnaire ; il arrive directement sur le menu du jour.
-  Il commande aussi comme tout le monde, et peut quitter ce mode depuis son profil (pratique avant de prêter son téléphone).
-- **La personne qui va au restaurant** : pas de compte à part, car ce n'est pas toujours la même. Elle touche « J'y vais »
-  sur la carte du jour ; elle seule (avec le gestionnaire) peut alors clôturer, ajouter ou retirer une commande.
+## Technique
 
-### Pensé pour le téléphone (iOS et Android)
+| | |
+| --- | --- |
+| **Interface et serveur** | Next.js 15 (App Router, route handlers), React 19, TypeScript strict |
+| **Base de données** | PostgreSQL via `postgres.js`. Le schéma est créé automatiquement au premier appel. |
+| **Validation** | Zod sur chaque requête. Les prix sont toujours recalculés côté serveur, jamais repris du téléphone. |
+| **PWA** | Manifeste, icônes générées en code, service worker (pages disponibles hors ligne, données toujours en direct) |
+| **Tests** | Vitest : analyse des menus collés, totaux, sessions signées, dates et validations |
 
-- Installable : bouton « Installer » sur Android, guide « Partager → Sur l'écran d'accueil » sur iPhone.
-- Grandes zones tactiles (44 px minimum), pas de zoom involontaire au double tap ni à la saisie.
-- Clavier ouvert : la barre du bas s'efface pour laisser la place au champ.
-- Testé de 320 px (iPhone SE) aux grands écrans, encoches et barre d'accueil prises en compte.
+### Sécurité
 
-**Identité visuelle « Lagon »** : un seul thème clair. Bleu lagon (turquoise ciel) pour les actions,
-corail pour les quantités et le total, mangue pour « J'y vais », fond blanc d'eau et textes ardoise doux
-plutôt que noirs. La carte du jour (restaurant, heure limite, qui y va) est un ticket turquoise
-reconnaissable au premier coup d'œil.
+- Deux codes distincts : le **code du bureau** pour commander, le **code gestionnaire** pour le menu.
+- Session dans un cookie `httpOnly` signé en **HMAC-SHA256** (Web Crypto), vérifiée par le middleware et dans chaque route.
+- Codes comparés en temps constant, avec un délai après chaque code faux.
+- Droits vérifiés côté serveur : chacun ne modifie que sa propre commande. Seuls le gestionnaire et la personne qui y va peuvent clôturer, ajouter ou supprimer pour les autres.
+- En-têtes de sécurité : `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`.
 
-## Stack
+## Lancer le projet en local
 
-- **Next.js 15** (App Router, route handlers) + **React 19**, TypeScript strict
-- **PostgreSQL** (Neon en production, Docker en local) via `postgres.js`, schéma créé automatiquement
-- **Zod** pour valider chaque requête ; les prix sont toujours recalculés côté serveur
-- **PWA** : manifeste, icônes générées en code, service worker (pages hors ligne, API toujours en direct)
-- **Vitest** : tests de l'analyse des menus, des totaux, des sessions signées et des validations
-
-## Sécurité
-
-- Accès par **code du bureau** ; un **code gestionnaire** séparé pour le menu et la clôture.
-- Session en cookie `httpOnly` signé **HMAC-SHA256** (Web Crypto), vérifié dans le middleware et dans chaque route.
-- Comparaison des codes en temps constant et délai après un code faux.
-- Droits vérifiés côté serveur : chacun ne modifie que sa commande ; seuls le gestionnaire ou la personne qui y va
-  peuvent clôturer, ajouter ou supprimer pour les autres.
-- En-têtes de sécurité (`X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`).
-
-## Lancer en local
+Prérequis : Node.js 20 ou plus récent, et Docker pour la base de données.
 
 ```bash
 npm install
-cp .env.example .env.local      # puis ajustez les codes
-npm run db:up                   # Postgres dans Docker (port 5433)
+cp .env.example .env.local      # puis choisissez vos codes
+npm run db:up                   # PostgreSQL dans Docker (port 5433)
 npm run dev                     # http://localhost:3000
-npm test                        # tests unitaires
 ```
 
-Les tables sont créées au premier appel. `npm run db:migrate` les crée à la main si besoin
-(`node --env-file=.env.local scripts/migrate.mjs`).
+Les tables sont créées à la première requête. Pour les créer à la main :
+`node --env-file=.env.local scripts/migrate.mjs`
 
-## Déployer sur Vercel
+### Variables d'environnement
 
-1. Poussez le dépôt sur GitHub, puis **Add New → Project** sur Vercel et importez-le.
-2. Dans le projet : **Storage → Create Database → Neon (Postgres)**, région **Europe (Frankfurt)**
-   pour être proche des serveurs de l'app (`vercel.json` les place à Francfort, au plus près de Dakar), et connectez-la au projet.
-   La variable `DATABASE_URL` est ajoutée automatiquement.
-3. **Settings → Environment Variables**, ajoutez :
-   - `OFFICE_CODE` : le code que vous donnerez aux collègues
-   - `ADMIN_CODE` : le code du gestionnaire (différent !)
-   - `SESSION_SECRET` : 32 caractères aléatoires ou plus
-     (`node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`)
-4. **Deploy**. Ouvrez l'URL sur votre téléphone :
-   - Android (Chrome) : bouton « Installer l'app » en haut de l'écran.
-   - iPhone (Safari) : Partager → « Sur l'écran d'accueil ».
+| Variable | Rôle |
+| --- | --- |
+| `DATABASE_URL` | Adresse de la base PostgreSQL |
+| `OFFICE_CODE` | Code donné aux collègues pour entrer dans l'app |
+| `ADMIN_CODE` | Code réservé au gestionnaire, différent du précédent |
+| `SESSION_SECRET` | Au moins 32 caractères aléatoires, pour signer les sessions |
 
-Changer `SESSION_SECRET` déconnecte tout le monde ; changer `OFFICE_CODE` n'empêche que les nouvelles connexions.
+Pour générer un `SESSION_SECRET` :
 
-## Structure
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+```
+
+Changer `SESSION_SECRET` déconnecte tout le monde. Changer `OFFICE_CODE` ne bloque que les nouvelles connexions.
+
+### Commandes utiles
+
+| Commande | Effet |
+| --- | --- |
+| `npm run dev` | Serveur de développement |
+| `npm test` | Tests unitaires |
+| `npm run typecheck` | Vérification TypeScript |
+| `npm run build` | Version de production |
+
+## Organisation du code
 
 ```
 app/(app)/            écrans Commander, La feuille, Menu
+app/login/            connexion (collègue ou gestionnaire)
 app/api/              session, day (menu, statut), order, history
-app/icons/[variant]/  icônes PWA générées
-components/           écrans et composants client
-lib/                  logique métier (menu, temps, sessions, accès base)
+app/icons/[variant]/  icônes de l'app, générées en code
+components/           écrans et composants de l'interface
+lib/                  logique métier : menus, dates, sessions, accès à la base
 db/schema.ts          schéma SQL
-public/sw.js          service worker
+public/sw.js          service worker (mode hors ligne)
 tests/                tests Vitest
+docs/screenshots/     captures d'écran du README
 ```
+
+---
+
+Réalisé par [Ibrahima Fall](https://github.com/ibrafall-tech).
