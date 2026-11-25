@@ -1,0 +1,664 @@
+<title>Commande du midi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one column app, header with day switcher and three tabs; order view = menu list + sticky "ma commande" ticket on the side; the bon is a receipt-style sheet. */
+:root{
+  --bg:#F5F3F4; --surface:#FFFFFF; --ink:#1D1A1C; --muted:#6B6468; --line:#E2DCDF;
+  --accent:#9B1D4C; --accent-ink:#FFFFFF; --accent-soft:#F6E4EB;
+  --ok:#1E7A4C; --ok-soft:#E1F2E8; --warn:#9A5500; --warn-soft:#FBEEDB; --danger:#B42318;
+  --paper:#FFFFFF;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Inter", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#141113; --surface:#1D191B; --ink:#F1ECEE; --muted:#A69DA2; --line:#352E32;
+  --accent:#E46A96; --accent-ink:#1B0811; --accent-soft:#3A1D29;
+  --ok:#5CC48E; --ok-soft:#173226; --warn:#E3A452; --warn-soft:#3A2A14; --danger:#F07A6E;
+  --paper:#1F1B1D; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#141113; --surface:#1D191B; --ink:#F1ECEE; --muted:#A69DA2; --line:#352E32;
+  --accent:#E46A96; --accent-ink:#1B0811; --accent-soft:#3A1D29;
+  --ok:#5CC48E; --ok-soft:#173226; --warn:#E3A452; --warn-soft:#3A2A14; --danger:#F07A6E;
+  --paper:#1F1B1D; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 48px}
+.wrap{max-width:1000px;margin:0 auto}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding-block:28px 14px}
+.brand h1{font-family:var(--f-display);font-weight:800;font-size:clamp(26px,5vw,36px);line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.brand p{margin:4px 0 0;color:var(--muted)}
+.day{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px}
+.day button{border:0;background:transparent;width:34px;height:34px;border-radius:999px;cursor:pointer;font-size:18px;color:var(--muted)}
+.day button:hover{background:var(--accent-soft);color:var(--accent)}
+.day .lbl{min-width:150px;text-align:center;font-weight:600;text-transform:capitalize}
+.day .lbl small{display:block;font-weight:500;color:var(--accent);text-transform:none;font-size:12px;line-height:1}
+
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+nav.tabs a{padding:10px 14px;text-decoration:none;color:var(--muted);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-color:var(--accent)}
+nav.tabs a .ct{display:inline-block;min-width:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:12px;text-align:center}
+
+.notice{border-radius:var(--r);padding:10px 14px;margin-bottom:16px;background:var(--warn-soft);color:var(--warn);font-weight:500}
+.notice.info{background:var(--accent-soft);color:var(--accent)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink)}
+.btn.danger{color:var(--danger)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted);min-width:0}
+input.in,select.in,textarea.in{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;color:var(--ink);font-weight:400;font-size:15px}
+textarea.in{resize:vertical;min-height:60px}
+input.in:focus,select.in:focus,textarea.in:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+
+/* strip */
+.strip{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-bottom:18px;color:var(--muted)}
+.strip b{color:var(--ink);font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.open{background:var(--ok-soft);color:var(--ok)}
+.pill.closed{background:var(--accent-soft);color:var(--accent)}
+.pill.late{background:var(--warn-soft);color:var(--warn)}
+
+/* order view */
+.order{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+@media (max-width:820px){.order{grid-template-columns:minmax(0,1fr)}}
+.cat h3{font-family:var(--f-display);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 8px}
+.cat:first-child h3{margin-top:0}
+.dish{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:8px}
+.dish.on{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.dish .nm{flex:1;min-width:0;font-weight:600}
+.dish .pr{font-family:var(--f-mono);color:var(--muted);font-size:14px;white-space:nowrap}
+.step{display:flex;align-items:center;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.step button{width:34px;height:34px;border:0;background:transparent;cursor:pointer;font-size:18px;font-weight:600;color:var(--accent)}
+.step button:hover:not(:disabled){background:var(--accent-soft)}
+.step button:disabled{color:var(--muted);opacity:.4;cursor:default}
+.step span{min-width:24px;text-align:center;font-family:var(--f-mono);font-weight:600}
+
+.ticket{position:sticky;top:calc(env(safe-area-inset-top, 0px) + 12px);background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px}
+.ticket h2{font-family:var(--f-display);font-size:20px;margin:0}
+.ticket .editing{font-size:13px;background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:6px 10px}
+.lines{font-family:var(--f-mono);font-size:14px;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);padding-block:10px;display:flex;flex-direction:column;gap:4px}
+.lines .l{display:flex;gap:8px}
+.lines .l span:first-child{flex:1;min-width:0}
+.lines .empty{color:var(--muted);font-family:var(--f-body)}
+.tot{display:flex;justify-content:space-between;font-weight:600;font-family:var(--f-mono);font-size:16px}
+.status{font-size:13px;color:var(--muted)}
+.status.ok{color:var(--ok)}
+.status.dirty{color:var(--warn)}
+.who{margin-top:24px}
+.who h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;font-family:var(--f-display);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px}
+
+.emptystate{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:36px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.emptystate h2{font-family:var(--f-display);margin:0;font-size:22px;text-wrap:balance}
+.emptystate p{margin:0;color:var(--muted);max-width:46ch}
+
+/* menu editor */
+.editor{display:flex;flex-direction:column;gap:18px;max-width:760px}
+.grid3{display:grid;grid-template-columns:2fr 1fr 1.4fr;gap:12px}
+@media (max-width:620px){.grid3{grid-template-columns:1fr}}
+.items{display:flex;flex-direction:column;gap:8px}
+.item{display:grid;grid-template-columns:minmax(0,1fr) 120px 150px 40px;gap:8px;align-items:center}
+@media (max-width:620px){.item{grid-template-columns:minmax(0,1fr) 100px 40px}.item select{grid-column:1 / 3}}
+.item .x{width:40px;height:40px;border:1px solid var(--line);background:var(--surface);border-radius:8px;cursor:pointer;color:var(--muted);font-size:18px}
+.item .x:hover{color:var(--danger);border-color:var(--danger)}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.section-t{font-family:var(--f-display);font-size:18px;margin:0}
+
+/* bon */
+.bon-wrap{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:24px;align-items:start}
+@media (max-width:820px){.bon-wrap{grid-template-columns:minmax(0,1fr)}}
+.receipt{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:24px 22px;font-family:var(--f-mono);font-size:14px;position:relative;min-width:0}
+.receipt::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:8px;
+  background:linear-gradient(-45deg,transparent 6px,var(--paper) 0) 0 0/12px 8px repeat-x,linear-gradient(45deg,transparent 6px,var(--paper) 0) 0 0/12px 8px repeat-x}
+.receipt h2{font-family:var(--f-display);font-size:22px;margin:0 0 2px;text-align:center;text-transform:uppercase;letter-spacing:.04em}
+.receipt .sub{text-align:center;color:var(--muted);margin:0 0 14px;text-transform:capitalize}
+.receipt .meta{border-top:1px dashed var(--line);padding-top:10px;margin-bottom:6px}
+.receipt h4{font-size:12px;letter-spacing:.12em;margin:18px 0 6px;color:var(--muted)}
+.tbl{overflow-x:auto}
+.receipt table{width:100%;border-collapse:collapse}
+.receipt td{padding:5px 0;vertical-align:top;border-bottom:1px dotted var(--line)}
+.receipt td.q{width:44px;font-weight:600;color:var(--accent)}
+.receipt td.a{text-align:right;white-space:nowrap;padding-left:10px}
+.receipt td.p{font-weight:600;padding-right:10px;white-space:nowrap}
+.receipt td.d .nt{display:block;color:var(--muted);font-size:13px}
+.receipt td.act{width:1%;white-space:nowrap;padding-left:6px}
+.receipt td.act button{font-family:var(--f-body);font-size:12px;border:0;background:transparent;color:var(--muted);cursor:pointer;padding:2px 4px;text-decoration:underline}
+.receipt td.act button.conf{color:var(--danger);font-weight:600}
+.receipt .grand{display:flex;justify-content:space-between;border-top:2px solid var(--ink);margin-top:14px;padding-top:10px;font-weight:600;font-size:17px}
+.receipt .foot{text-align:center;color:var(--muted);margin-top:12px;font-size:12px}
+.side{display:flex;flex-direction:column;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.side .btn{width:100%}
+.copybox{width:100%;min-height:160px;font-family:var(--f-mono);font-size:12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom, 0px) + 18px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;z-index:20}
+.loading{color:var(--muted);padding:40px 0;text-align:center}
+@media (prefers-reduced-motion: no-preference){.dish{transition:border-color .15s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Commande du midi</h1>
+      <p>Chacun choisit son plat, la personne qui y va récupère la feuille.</p>
+    </div>
+    <div class="day" role="group" aria-label="Jour">
+      <button id="prevDay" type="button" aria-label="Jour précédent">‹</button>
+      <div class="lbl" id="dayLbl"></div>
+      <button id="nextDay" type="button" aria-label="Jour suivant">›</button>
+    </div>
+  </header>
+  <nav class="tabs" id="tabs">
+    <a href="#commander" data-v="commander">Commander</a>
+    <a href="#menu" data-v="menu">Menu du jour</a>
+    <a href="#bon" data-v="bon">Bon de commande<span class="ct num" id="ordCt">0</span></a>
+  </nav>
+  <div id="notices"></div>
+  <main id="main"><p class="loading">Chargement du menu…</p></main>
+</div>
+
+<script>
+(() => {
+"use strict";
+const CATS = ["Plat", "Accompagnement", "Boisson", "Dessert"];
+const $ = (s) => document.querySelector(s);
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (v == null || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k === "text") el.textContent = v;
+    else if (k === "value") el.value = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of kids.flat()) {
+    if (c == null || c === false) continue;
+    el.append(c instanceof Node ? c : document.createTextNode(String(c)));
+  }
+  return el;
+}
+const fmt = (n) => Math.round(n || 0).toLocaleString("fr-FR") + " FCFA";
+const keyOf = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const TODAY = keyOf(new Date());
+const dateOf = (k) => new Date(k + "T12:00:00");
+const longDate = (k) => dateOf(k).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+const rid = () => Math.random().toString(36).slice(2, 10);
+const ls = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+const S = {
+  db: null, dl: null, uid: null, dbChecked: false, readOnly: false,
+  date: TODAY, view: "commander",
+  day: null, gotDay: false, orders: [], gotOrders: false, confirmed: { day: false, orders: false }, stale: false, err: "",
+  cart: {}, note: "", name: ls.get("cm_name") || "", cartDirty: false, editingId: null, saving: false, savedAt: 0,
+  draft: null, draftDirty: false, confirmDel: null, copyText: null,
+};
+let unsubs = [];
+let staleTimer = null;
+
+function myOrderId() {
+  if (S.editingId) return S.editingId;
+  if (S.uid) return S.uid;
+  let k = ls.get("cm_local_id");
+  if (!k) { k = "local-" + rid(); ls.set("cm_local_id", k); }
+  return k;
+}
+const items = () => (S.day && Array.isArray(S.day.items)) ? S.day.items : [];
+const findOrder = (id) => S.orders.find((o) => o.id === id);
+
+function toast(msg) {
+  const t = h("div", { class: "toast", role: "status", text: msg });
+  document.body.append(t);
+  setTimeout(() => t.remove(), 2200);
+}
+
+/* ---------- data ---------- */
+function subscribe() {
+  unsubs.forEach((u) => u()); unsubs = [];
+  clearTimeout(staleTimer);
+  Object.assign(S, { day: null, gotDay: false, orders: [], gotOrders: false, confirmed: { day: false, orders: false }, stale: false, err: "" });
+  if (!S.db) { render(); return; }
+  const date = S.date;
+  staleTimer = setTimeout(() => { if (!S.confirmed.day || !S.confirmed.orders) { S.stale = true; render(); } }, 10000);
+  const done = () => { if (S.confirmed.day && S.confirmed.orders) { clearTimeout(staleTimer); S.stale = false; } };
+  const onErr = (e) => { clearTimeout(staleTimer); S.gotDay = S.gotOrders = true; S.err = "Les données ne sont pas accessibles (" + (e && e.code || "erreur") + ")."; render(); };
+  unsubs.push(S.db.doc("days/" + date).onSnapshot((snap) => {
+    if (date !== S.date) return;
+    S.day = snap.exists ? snap.data() : null;
+    S.gotDay = true;
+    if (!snap.metadata.fromCache) { S.confirmed.day = true; done(); }
+    if (S.view === "menu" && !S.draftDirty) S.draft = null;
+    render();
+  }, onErr));
+  unsubs.push(S.db.collection("days/" + date + "/orders").onSnapshot((qs) => {
+    if (date !== S.date) return;
+    S.orders = qs.docs.map((d) => ({ id: d.id, ...d.data() }));
+    S.gotOrders = true;
+    if (!qs.metadata.fromCache) { S.confirmed.orders = true; done(); }
+    if (!S.cartDirty) loadCartFrom(findOrder(myOrderId()));
+    render();
+  }, onErr));
+  render();
+}
+
+function loadCartFrom(o) {
+  S.cart = {}; S.note = "";
+  if (o) {
+    for (const l of o.lines || []) S.cart[l.id] = (S.cart[l.id] || 0) + (l.qty || 0);
+    S.note = o.note || "";
+    if (o.name) S.name = o.name;
+  } else if (S.editingId) {
+    S.name = "";
+  } else {
+    S.name = ls.get("cm_name") || "";
+  }
+}
+
+function writeFailed(e) {
+  if (e && e.code === "invalid_argument") { S.readOnly = true; toast("Vous n'avez pas le droit de modifier cette page."); }
+  else if (e && e.code === "quota_exceeded") toast("Espace de stockage plein : supprimez d'anciennes commandes.");
+  else toast("Échec de l'enregistrement, réessayez.");
+  render();
+}
+
+async function saveOrder() {
+  const name = S.name.trim();
+  if (!name) { toast("Indiquez votre prénom."); document.getElementById("o-name")?.focus(); return; }
+  const lines = items().filter((it) => S.cart[it.id] > 0).map((it) => ({ id: it.id, name: it.name, price: Number(it.price) || 0, qty: S.cart[it.id] }));
+  const id = myOrderId();
+  S.saving = true; render();
+  try {
+    const ref = S.db.doc("days/" + S.date + "/orders/" + id);
+    if (!lines.length) await ref.delete();
+    else await ref.set({ name, lines, note: S.note.trim(), total: lines.reduce((s, l) => s + l.price * l.qty, 0), by: S.uid || null, forSomeoneElse: !!S.editingId, updatedAt: Date.now() });
+    if (!S.editingId) ls.set("cm_name", name);
+    S.cartDirty = false; S.savedAt = Date.now();
+    if (S.editingId) {
+      toast(lines.length ? "Commande de " + name + " enregistrée" : "Commande retirée");
+      S.editingId = null; loadCartFrom(findOrder(myOrderId()));
+      location.hash = "bon";
+    } else toast(lines.length ? "Commande enregistrée" : "Commande retirée");
+  } catch (e) { writeFailed(e); }
+  S.saving = false; render();
+}
+
+async function deleteOrder(id) {
+  try { await S.db.doc("days/" + S.date + "/orders/" + id).delete(); toast("Commande supprimée"); }
+  catch (e) { writeFailed(e); }
+  S.confirmDel = null; render();
+}
+
+async function saveMenu() {
+  const d = S.draft;
+  const clean = d.items.map((it) => ({ id: it.id, name: String(it.name || "").trim(), price: Math.max(0, Number(it.price) || 0), cat: CATS.includes(it.cat) ? it.cat : "Plat" })).filter((it) => it.name);
+  if (!clean.length) { toast("Ajoutez au moins un plat."); return; }
+  S.saving = true; render();
+  try {
+    await S.db.doc("days/" + S.date).set({
+      date: S.date, restaurant: d.restaurant.trim(), deadline: d.deadline || "", runner: d.runner.trim(),
+      closed: !!d.closed, items: clean, updatedAt: Date.now(), updatedBy: S.uid || null,
+    });
+    S.draftDirty = false; S.draft = null; toast("Menu publié");
+    location.hash = "commander";
+  } catch (e) { writeFailed(e); }
+  S.saving = false; render();
+}
+
+async function patchDay(patch) {
+  if (!S.day) return;
+  try { await S.db.doc("days/" + S.date).update({ ...patch, updatedAt: Date.now() }); }
+  catch (e) { writeFailed(e); }
+}
+
+async function copyPreviousMenu() {
+  try {
+    const qs = await S.db.collection("days").orderBy("date", "desc").limit(15).get();
+    const prev = qs.docs.map((d) => d.data()).find((d) => d.date !== S.date && Array.isArray(d.items) && d.items.length);
+    if (!prev) { toast("Aucun menu précédent trouvé."); return; }
+    S.draft.items = prev.items.map((it) => ({ ...it, id: rid() }));
+    if (!S.draft.restaurant) S.draft.restaurant = prev.restaurant || "";
+    if (!S.draft.deadline) S.draft.deadline = prev.deadline || "";
+    S.draftDirty = true;
+    toast("Menu du " + longDate(prev.date) + " repris, ajustez-le si besoin");
+    render();
+  } catch { toast("Impossible de lire les anciens menus."); }
+}
+
+/* ---------- summaries ---------- */
+function summary() {
+  const byDish = new Map();
+  let total = 0, count = 0;
+  const people = [...S.orders].sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "fr"));
+  for (const o of people) {
+    for (const l of o.lines || []) {
+      const k = l.name + "|" + l.price;
+      const cur = byDish.get(k) || { name: l.name, price: Number(l.price) || 0, qty: 0 };
+      cur.qty += l.qty || 0; byDish.set(k, cur);
+      total += (Number(l.price) || 0) * (l.qty || 0); count += l.qty || 0;
+    }
+  }
+  const dishes = [...byDish.values()].sort((a, b) => b.qty - a.qty || a.name.localeCompare(b.name, "fr"));
+  return { dishes, people, total, count };
+}
+const lineText = (o) => (o.lines || []).map((l) => l.qty + " × " + l.name).join(", ");
+
+function bonText() {
+  const { dishes, people, total } = summary();
+  const d = S.day || {};
+  const out = ["COMMANDE DU MIDI · " + longDate(S.date)];
+  if (d.restaurant) out.push("Restaurant : " + d.restaurant);
+  if (d.runner) out.push("Récupérée par : " + d.runner);
+  out.push("", "RÉCAP PAR PLAT");
+  for (const x of dishes) out.push(x.qty + " × " + x.name + " — " + fmt(x.price * x.qty));
+  out.push("", "PAR PERSONNE");
+  for (const o of people) out.push("• " + (o.name || "?") + " : " + lineText(o) + (o.note ? " (" + o.note + ")" : "") + " — " + fmt(o.total));
+  out.push("", "TOTAL : " + fmt(total) + " · " + people.length + " personne" + (people.length > 1 ? "s" : ""));
+  return out.join("\n");
+}
+
+function bonHtmlFile() {
+  const { dishes, people, total } = summary();
+  const d = S.day || {};
+  const rows1 = dishes.map((x) => `<tr><td class="q">${x.qty}×</td><td>${esc(x.name)}</td><td class="a">${esc(fmt(x.price * x.qty))}</td></tr>`).join("");
+  const rows2 = people.map((o) => `<tr><td class="p">${esc(o.name)}</td><td>${esc(lineText(o))}${o.note ? `<br><i>${esc(o.note)}</i>` : ""}</td><td class="a">${esc(fmt(o.total))}</td><td class="ck">☐</td></tr>`).join("");
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Commande du midi ${esc(S.date)}</title>
+<style>body{font-family:Consolas,"Courier New",monospace;max-width:720px;margin:24px auto;padding:0 16px;color:#111}
+h1{font-size:22px;margin:0;text-transform:uppercase}p.s{margin:2px 0 14px;color:#555}h2{font-size:13px;letter-spacing:.1em;margin:20px 0 6px;border-bottom:2px solid #111;padding-bottom:3px}
+table{width:100%;border-collapse:collapse}td{padding:6px 4px;border-bottom:1px dotted #999;vertical-align:top}td.q{width:48px;font-weight:bold}td.a{text-align:right;white-space:nowrap}td.p{font-weight:bold;white-space:nowrap}td.ck{width:24px;text-align:center}
+.t{display:flex;justify-content:space-between;font-weight:bold;font-size:18px;border-top:2px solid #111;margin-top:14px;padding-top:8px}
+button{margin-top:20px;padding:8px 16px;font:inherit}@media print{button{display:none}}</style></head><body>
+<h1>Commande du midi</h1><p class="s">${esc(longDate(S.date))}${d.restaurant ? " · " + esc(d.restaurant) : ""}${d.runner ? " · récupérée par " + esc(d.runner) : ""}</p>
+<h2>RÉCAP PAR PLAT</h2><table>${rows1}</table><h2>PAR PERSONNE</h2><table>${rows2}</table>
+<div class="t"><span>TOTAL (${people.length} pers.)</span><span>${esc(fmt(total))}</span></div>
+<button onclick="window.print()">Imprimer</button></body></html>`;
+}
+
+/* ---------- views ---------- */
+function statusPill() {
+  const d = S.day;
+  if (!d) return null;
+  if (d.closed) return h("span", { class: "pill closed", text: "Commandes clôturées" });
+  if (S.date === TODAY && d.deadline) {
+    const now = new Date(); const [hh, mm] = d.deadline.split(":").map(Number);
+    if (now.getHours() * 60 + now.getMinutes() > hh * 60 + mm) return h("span", { class: "pill late", text: "Heure limite passée" });
+  }
+  return h("span", { class: "pill open", text: "Commandes ouvertes" });
+}
+
+function infoStrip() {
+  const d = S.day || {};
+  return h("div", { class: "strip" },
+    statusPill(),
+    d.restaurant ? h("span", null, "Restaurant ", h("b", { text: d.restaurant })) : null,
+    d.deadline ? h("span", null, "Jusqu'à ", h("b", { class: "num", text: d.deadline.replace(":", "h") })) : null,
+    h("span", null, "Y va : ", h("b", { text: d.runner || "personne pour l'instant" })),
+  );
+}
+
+function emptyMenu() {
+  return h("div", { class: "emptystate" },
+    h("h2", { text: "Pas encore de menu pour " + (S.date === TODAY ? "aujourd'hui" : longDate(S.date)) }),
+    h("p", { text: "Dès que quelqu'un saisit les plats du restaurant, chacun pourra choisir le sien ici." }),
+    !S.readOnly && S.db ? h("a", { class: "btn primary", href: "#menu", text: "Saisir le menu du jour" }) : null,
+  );
+}
+
+function viewCommander() {
+  if (!items().length) return [emptyMenu()];
+  const closed = !!(S.day && S.day.closed) && !S.editingId;
+  const lock = closed || S.readOnly || !S.db;
+  const groups = CATS.map((c) => [c, items().filter((it) => (it.cat || "Plat") === c)]).filter(([, l]) => l.length);
+  const menuCol = h("div", { style: "min-width:0" }, groups.map(([c, list]) => h("section", { class: "cat" },
+    h("h3", { text: c }),
+    list.map((it) => {
+      const q = S.cart[it.id] || 0;
+      const setQ = (n) => { S.cart[it.id] = Math.max(0, Math.min(9, n)); S.cartDirty = true; render(); };
+      return h("div", { class: "dish" + (q ? " on" : "") },
+        h("div", { class: "nm", text: it.name }),
+        h("div", { class: "pr num", text: fmt(it.price) }),
+        h("div", { class: "step" },
+          h("button", { type: "button", "aria-label": "Retirer " + it.name, disabled: lock || !q, onclick: () => setQ(q - 1), text: "−" }),
+          h("span", { class: "num", "aria-live": "polite", text: q }),
+          h("button", { type: "button", "aria-label": "Ajouter " + it.name, disabled: lock, onclick: () => setQ(q + 1), text: "+" }),
+        ),
+      );
+    }),
+  )));
+
+  const chosen = items().filter((it) => S.cart[it.id] > 0);
+  const total = chosen.reduce((s, it) => s + (Number(it.price) || 0) * S.cart[it.id], 0);
+  const existing = findOrder(myOrderId());
+  let st = null;
+  if (S.cartDirty) st = h("div", { class: "status dirty", text: "Modifications non enregistrées" });
+  else if (existing) st = h("div", { class: "status ok", text: "✓ Commande enregistrée à " + new Date(existing.updatedAt || S.savedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) });
+
+  const ticket = h("aside", { class: "ticket" },
+    h("h2", { text: S.editingId ? "Commande d'un collègue" : "Ma commande" }),
+    S.editingId ? h("div", { class: "editing" }, "Vous saisissez pour quelqu'un d'autre. ",
+      h("button", { class: "btn ghost", type: "button", style: "padding:0;font-size:13px", onclick: () => { S.editingId = null; S.cartDirty = false; loadCartFrom(findOrder(myOrderId())); render(); }, text: "Annuler" })) : null,
+    closed ? h("div", { class: "notice", style: "margin:0", text: "Les commandes sont clôturées pour ce jour." }) : null,
+    h("label", { class: "f", for: "o-name" }, "Prénom",
+      h("input", { class: "in", id: "o-name", autocomplete: "given-name", placeholder: "Ex. Awa", value: S.name, disabled: lock, oninput: (e) => { S.name = e.target.value; S.cartDirty = true; refreshStatus(); } })),
+    h("div", { class: "lines" },
+      chosen.length ? chosen.map((it) => h("div", { class: "l" }, h("span", { text: S.cart[it.id] + " × " + it.name }), h("span", { class: "num", text: fmt(it.price * S.cart[it.id]) })))
+        : h("div", { class: "empty", text: "Choisissez vos plats avec le bouton +" })),
+    h("div", { class: "tot" }, h("span", { text: "Total" }), h("span", { class: "num", text: fmt(total) })),
+    h("label", { class: "f", for: "o-note" }, "Précision (facultatif)",
+      h("textarea", { class: "in", id: "o-note", rows: "2", placeholder: "Sans piment, sauce à part…", value: S.note, disabled: lock, oninput: (e) => { S.note = e.target.value; S.cartDirty = true; refreshStatus(); } })),
+    h("div", { id: "o-status" }, st),
+    h("button", { class: "btn primary", type: "button", disabled: lock || S.saving || (!chosen.length && !existing), onclick: saveOrder,
+      text: S.saving ? "Enregistrement…" : (!chosen.length && existing ? "Retirer ma commande" : (existing ? "Mettre à jour" : "Valider ma commande")) }),
+  );
+
+  const others = S.orders.filter((o) => o.id !== myOrderId());
+  const who = h("div", { class: "who" },
+    h("h3", { text: "Ont déjà commandé (" + S.orders.length + ")" }),
+    S.orders.length ? h("div", { class: "chips" }, S.orders.map((o) => h("span", { class: "chip", text: o.name || "?" }))) : h("p", { class: "hint", text: "Personne pour l'instant." }));
+  menuCol.append(who);
+  void others;
+  return [infoStrip(), h("div", { class: "order" }, menuCol, ticket)];
+}
+
+function refreshStatus() {
+  const box = document.getElementById("o-status");
+  if (box) box.replaceChildren(h("div", { class: "status dirty", text: "Modifications non enregistrées" }));
+}
+
+function ensureDraft() {
+  if (S.draft) return;
+  const d = S.day || {};
+  S.draft = {
+    restaurant: d.restaurant || "", deadline: d.deadline || "11:30", runner: d.runner || "", closed: !!d.closed,
+    items: (d.items || []).map((it) => ({ ...it })),
+  };
+  if (!S.draft.items.length) S.draft.items = [{ id: rid(), name: "", price: "", cat: "Plat" }];
+}
+
+function viewMenu() {
+  if (S.readOnly || !S.db) return [h("div", { class: "notice info", text: "Seules les personnes autorisées à modifier cette page peuvent saisir le menu." })];
+  ensureDraft();
+  const d = S.draft;
+  const dirty = () => { S.draftDirty = true; };
+  const field = (label, id, key, attrs) => h("label", { class: "f", for: id }, label,
+    h("input", { class: "in", id, value: d[key], ...attrs, oninput: (e) => { d[key] = e.target.value; dirty(); } }));
+  const rows = d.items.map((it, i) => h("div", { class: "item" },
+    h("input", { class: "in", id: "it-n-" + it.id, "aria-label": "Nom du plat", placeholder: "Ex. Thiéboudienne", value: it.name, oninput: (e) => { it.name = e.target.value; dirty(); } }),
+    h("input", { class: "in num", id: "it-p-" + it.id, "aria-label": "Prix en FCFA", type: "number", inputmode: "numeric", min: "0", step: "50", placeholder: "Prix", value: it.price, oninput: (e) => { it.price = e.target.value; dirty(); } }),
+    h("select", { class: "in", id: "it-c-" + it.id, "aria-label": "Catégorie", onchange: (e) => { it.cat = e.target.value; dirty(); } },
+      CATS.map((c) => { const o = h("option", { value: c, text: c }); if ((it.cat || "Plat") === c) o.selected = true; return o; })),
+    h("button", { class: "x", type: "button", "aria-label": "Supprimer ce plat", onclick: () => { d.items.splice(i, 1); dirty(); render(); }, text: "×" }),
+  ));
+  const hasOrders = S.orders.length > 0;
+  return [h("div", { class: "editor" },
+    h("p", { class: "hint", text: "Menu pour " + longDate(S.date) + ". Le menu change chaque jour : saisissez les plats proposés aujourd'hui, ou reprenez le dernier menu et ajustez." }),
+    h("div", { class: "grid3" },
+      field("Restaurant", "m-resto", "restaurant", { placeholder: "Ex. Chez Fatou" }),
+      field("Heure limite", "m-dead", "deadline", { type: "time" }),
+      field("Qui va chercher ?", "m-runner", "runner", { placeholder: "Ex. Moussa" }),
+    ),
+    h("div", { class: "row", style: "justify-content:space-between" },
+      h("h2", { class: "section-t", text: "Plats proposés" }),
+      h("button", { class: "btn", type: "button", onclick: copyPreviousMenu, text: "Reprendre le dernier menu" })),
+    h("div", { class: "items" }, rows),
+    h("div", null, h("button", { class: "btn", type: "button", onclick: () => { d.items.push({ id: rid(), name: "", price: "", cat: "Plat" }); dirty(); render(); setTimeout(() => document.getElementById("it-n-" + d.items[d.items.length - 1].id)?.focus(), 0); }, text: "+ Ajouter un plat" })),
+    hasOrders ? h("p", { class: "hint", text: S.orders.length + " commande(s) déjà passée(s) : elles gardent les plats et prix choisis au moment de la commande." }) : null,
+    h("div", { class: "row" },
+      h("button", { class: "btn primary", type: "button", disabled: S.saving, onclick: saveMenu, text: S.saving ? "Publication…" : "Publier le menu" }),
+      S.draftDirty ? h("button", { class: "btn ghost", type: "button", onclick: () => { S.draft = null; S.draftDirty = false; render(); }, text: "Annuler les modifications" }) : null),
+  )];
+}
+
+function viewBon() {
+  const { dishes, people, total, count } = summary();
+  const d = S.day || {};
+  if (!people.length) {
+    return [h("div", { class: "emptystate" },
+      h("h2", { text: "Aucune commande pour l'instant" }),
+      h("p", { text: "La feuille se remplit au fur et à mesure que chacun valide sa commande." }),
+      items().length ? h("a", { class: "btn primary", href: "#commander", text: "Passer ma commande" }) : (S.db && !S.readOnly ? h("a", { class: "btn primary", href: "#menu", text: "Saisir le menu du jour" }) : null))];
+  }
+  const canEditRows = S.db && !S.readOnly;
+  const receipt = h("article", { class: "receipt", "aria-label": "Bon de commande" },
+    h("h2", { text: "Commande du midi" }),
+    h("p", { class: "sub", text: longDate(S.date) }),
+    h("div", { class: "meta" },
+      d.restaurant ? h("div", null, "Restaurant : ", h("b", { text: d.restaurant })) : null,
+      h("div", null, "Récupérée par : ", h("b", { text: d.runner || "—" })),
+      h("div", null, "Articles : ", h("b", { class: "num", text: count }))),
+    h("h4", { text: "RÉCAP PAR PLAT" }),
+    h("div", { class: "tbl" }, h("table", null, h("tbody", null, dishes.map((x) => h("tr", null,
+      h("td", { class: "q num", text: x.qty + "×" }), h("td", { text: x.name }), h("td", { class: "a num", text: fmt(x.price * x.qty) })))))),
+    h("h4", { text: "PAR PERSONNE" }),
+    h("div", { class: "tbl" }, h("table", null, h("tbody", null, people.map((o) => h("tr", null,
+      h("td", { class: "p", text: o.name || "?" }),
+      h("td", { class: "d" }, lineText(o), o.note ? h("span", { class: "nt", text: "↳ " + o.note }) : null),
+      h("td", { class: "a num", text: fmt(o.total) }),
+      canEditRows ? h("td", { class: "act" },
+        h("button", { type: "button", onclick: () => { S.editingId = o.id === (S.uid || "") ? null : o.id; S.cartDirty = false; loadCartFrom(o); location.hash = "commander"; render(); }, text: "Modifier" }),
+        S.confirmDel === o.id
+          ? h("button", { type: "button", class: "conf", onclick: () => deleteOrder(o.id), text: "Confirmer" })
+          : h("button", { type: "button", onclick: () => { S.confirmDel = o.id; render(); }, text: "Suppr." })) : null,
+    ))))),
+    h("div", { class: "grand" }, h("span", { text: "TOTAL · " + people.length + " pers." }), h("span", { class: "num", text: fmt(total) })),
+    h("p", { class: "foot", text: "Merci et bon appétit" }),
+  );
+
+  const side = h("aside", { class: "side" },
+    h("h2", { class: "section-t", text: "Pour la personne qui y va" }),
+    canEditRows && S.day ? h("label", { class: "f", for: "b-runner" }, "Qui va chercher ?",
+      h("input", { class: "in", id: "b-runner", placeholder: "Votre prénom", value: d.runner || "",
+        onchange: (e) => patchDay({ runner: e.target.value.trim() }) })) : null,
+    h("button", { class: "btn primary", type: "button", onclick: onCopy, text: "Copier le texte" }),
+    h("p", { class: "hint", text: "À coller dans WhatsApp ou à montrer au restaurant." }),
+    S.dl ? h("button", { class: "btn", type: "button", onclick: onDownload, text: "Télécharger la feuille à imprimer" }) : null,
+    canEditRows && S.day ? h("button", { class: "btn", type: "button", onclick: () => patchDay({ closed: !d.closed }), text: d.closed ? "Rouvrir les commandes" : "Clôturer les commandes" }) : null,
+    canEditRows && items().length ? h("button", { class: "btn ghost", type: "button", onclick: () => { S.editingId = "x-" + rid(); S.cartDirty = false; loadCartFrom(null); location.hash = "commander"; render(); }, text: "+ Ajouter pour un collègue" }) : null,
+    S.copyText != null ? h("textarea", { class: "in copybox", id: "b-copy", readonly: true, value: S.copyText }) : null,
+  );
+  return [infoStrip(), h("div", { class: "bon-wrap" }, receipt, side)];
+}
+
+async function onCopy() {
+  const text = bonText();
+  try { await navigator.clipboard.writeText(text); toast("Texte copié"); S.copyText = null; render(); }
+  catch {
+    S.copyText = text; render();
+    const ta = document.getElementById("b-copy"); if (ta) { ta.focus(); ta.select(); }
+    toast("Sélectionnez le texte ci-dessous et copiez-le");
+  }
+}
+async function onDownload() {
+  try { await S.dl.save({ filename: "commande-midi-" + S.date + ".html", data: bonHtmlFile() }); toast("Feuille téléchargée : ouvrez-la puis imprimez"); }
+  catch (e) { if (!e || e.code !== "declined") toast("Téléchargement impossible ici."); }
+}
+
+/* ---------- render ---------- */
+function render() {
+  const lbl = $("#dayLbl");
+  lbl.replaceChildren(h("span", { text: longDate(S.date) }), S.date === TODAY ? h("small", { text: "aujourd'hui" }) : null);
+  for (const a of document.querySelectorAll("#tabs a")) {
+    if (a.dataset.v === S.view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  }
+  $("#ordCt").textContent = S.orders.length;
+
+  const notes = [];
+  if (S.dbChecked && !S.db) notes.push(h("div", { class: "notice", text: "La liste partagée n'est pas disponible ici. Ouvrez la page dans claude.ai en étant connecté pour commander." }));
+  if (S.readOnly && S.db) notes.push(h("div", { class: "notice info", text: "Vous consultez en lecture seule : demandez un accès Contributeur pour commander." }));
+  if (S.stale) notes.push(h("div", { class: "notice", text: "Connexion lente : les commandes affichées ne sont peut-être pas à jour." }));
+  if (S.err) notes.push(h("div", { class: "notice", text: S.err }));
+  $("#notices").replaceChildren(...notes);
+
+  const main = $("#main");
+  if (!S.dbChecked || (S.db && (!S.gotDay || !S.gotOrders) && !S.err)) {
+    if (!S.stale) { main.replaceChildren(h("p", { class: "loading", text: "Chargement du menu…" })); return; }
+  }
+  // keep focus and caret across re-renders
+  const act = document.activeElement;
+  const fid = act && act.id && main.contains(act) ? act.id : null;
+  let sel = null;
+  try { if (fid && act.selectionStart != null) sel = [act.selectionStart, act.selectionEnd]; } catch {}
+  const y = window.scrollY;
+  const nodes = S.view === "menu" ? viewMenu() : S.view === "bon" ? viewBon() : viewCommander();
+  main.replaceChildren(...nodes);
+  if (fid) {
+    const el = document.getElementById(fid);
+    if (el) { el.focus({ preventScroll: true }); try { if (sel) el.setSelectionRange(sel[0], sel[1]); } catch {} }
+  }
+  window.scrollTo(0, y);
+}
+
+function routeFromHash() {
+  const v = (location.hash || "").slice(1);
+  S.view = ["commander", "menu", "bon"].includes(v) ? v : "commander";
+  if (S.view === "menu" && !S.draftDirty) S.draft = null;
+  S.confirmDel = null;
+}
+window.addEventListener("hashchange", () => { routeFromHash(); render(); window.scrollTo(0, 0); });
+
+function shiftDay(n) {
+  if ((S.cartDirty || S.draftDirty) && !shiftDay.warned) { shiftDay.warned = true; toast("Modifications non enregistrées : cliquez encore pour changer de jour"); return; }
+  shiftDay.warned = false;
+  const d = dateOf(S.date); d.setDate(d.getDate() + n);
+  S.date = keyOf(d); S.cartDirty = false; S.draft = null; S.draftDirty = false; S.editingId = null;
+  subscribe();
+}
+$("#prevDay").addEventListener("click", () => shiftDay(-1));
+$("#nextDay").addEventListener("click", () => shiftDay(1));
+
+routeFromHash();
+render();
+
+(async () => {
+  const c = window.claude;
+  const use = (n) => (c && c.use ? c.use(n).catch(() => null) : Promise.resolve(null));
+  const [db, user, dl] = await Promise.all([use("db"), use("user"), use("downloads")]);
+  S.db = db; S.dl = dl; S.dbChecked = true;
+  if (user) {
+    try { S.uid = await user.id(); } catch {}
+    try { const w = await user.can("data.write"); if (w === false) S.readOnly = true; } catch {}
+  }
+  if (!S.cartDirty) loadCartFrom(null);
+  subscribe();
+})();
+setTimeout(() => { if (!S.dbChecked) { S.dbChecked = true; render(); } }, 11000);
+})();
+</script>

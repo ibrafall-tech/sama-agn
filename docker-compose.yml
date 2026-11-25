@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: midi
+      POSTGRES_PASSWORD: midi
+      POSTGRES_DB: midi
+    ports:
+      - "5433:5432"
+    volumes:
+      - midi-data:/var/lib/postgresql/data
+
+volumes:
+  midi-data:
