@@ -38,9 +38,10 @@ chacun choisit sur son téléphone, et la personne qui va au restaurant récupè
 
 Les écrans se mettent à jour tout seuls (toutes les 5 secondes quand l'app est ouverte).
 
-**Identité visuelle « Bazin & Bissap »** : un seul thème clair. Indigo du bazin teint pour les actions,
-rose hibiscus pour les quantités et le total, mangue pour « J'y vais », fond blanc à peine lilas.
-La carte du jour (restaurant, heure limite, qui y va) est un ticket indigo reconnaissable au premier coup d'œil.
+**Identité visuelle « Lagon »** : un seul thème clair. Bleu lagon (turquoise ciel) pour les actions,
+corail pour les quantités et le total, mangue pour « J'y vais », fond blanc d'eau et textes ardoise doux
+plutôt que noirs. La carte du jour (restaurant, heure limite, qui y va) est un ticket turquoise
+reconnaissable au premier coup d'œil.
 
 ## Stack
 
